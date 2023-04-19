@@ -40,6 +40,9 @@ for pred in fa.get_landmarks(image, boxes):
     big_lips = cv2.resize(lips, (0, 0), fx=z, fy=z)  
     
     cv2.drawContours(image, [lips_landmarks], -1, (0, 0, 0), -1) 
+    contours, _ = cv2.findContours(image, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
+            cv2.resize(contour, (0,0), fx=z, fy=z)
         
     y = y- (h//2)
     x = x - (w//2)
