@@ -3,8 +3,8 @@ import cv2
 import tensorflow as tf
 from functools import partial
 import time
-from TFLiteFaceDetector import UltraLightFaceDetecion   #از فایل دیگه ایمپورت شده
-from TFLiteFaceAlignment import CoordinateAlignmentModel  #از فایل دیگه ایمپورت شده
+from TFLiteFaceDetector import UltraLightFaceDetecion  
+from TFLiteFaceAlignment import CoordinateAlignmentModel  
 
 fd = UltraLightFaceDetecion("weights/RFB-320.tflite",conf_threshold=0.88)
 fa = CoordinateAlignmentModel("weights/coor_2d106.tflite")
@@ -18,28 +18,28 @@ color = (0, 0, 255)  # رنگ قرمز
 boxes, scores = fd.inference(image)
 
 def zoom(image, point):
-    for pred in fa.get_landmarks(image, boxes):  # به ازای هر تعداد چهره تکرار میشود
-        # for i,p in enumerate(np.round(pred).astype(np.int)):   #به تعداد لندمارکهای روی چهره تکرار میشود #enumerate اندیس برمیگرداند
-        #     cv2.circle(image, tuple(p), 2, color, -1) #منفی یک باعث میشود دایره توپر شود
+    for pred in fa.get_landmarks(image, boxes):  
+        # for i,p in enumerate(np.round(pred).astype(np.int)):   
+        #     cv2.circle(image, tuple(p), 2, color, -1) 
         #     cv2.putText(image, str(i), tuple(p), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0)) # چاپ اندیس
 
         landmarks = []
         for i in point:
-            landmarks.append(pred[i])  #مختصات ایکس و وای نقاط خط قبل را به لیست لیپ لند مارکس اپند میکنیم
-        landmarks = np.array(landmarks, dtype=int)   # اینجا باید اینت ساده باشه    
+            landmarks.append(pred[i])  
+        landmarks = np.array(landmarks, dtype=int)       
         # print(landmarks)    
 
-        x, y, w, h = cv2.boundingRect(landmarks)  #ـ مختصات دور لب ـ مختصات نقاطی که بهش دادیم را برمیگرداند
-        mask = np.zeros(image.shape, dtype=np.uint8)   # اینجا باید np.uint8 باشه
+        x, y, w, h = cv2.boundingRect(landmarks)  
+        mask = np.zeros(image.shape, dtype=np.uint8)   
         cv2.drawContours(mask, [landmarks], -1, (255, 255, 255), -1)  
         
         mask = mask // 255
 
-        black_mask = image * mask   # تصویر لب با حاشیه سیاه
-        black_mask = black_mask[y:y+h, x:x+w]  # برای اینکه لب را بزرگ کنیم دور لب را کراپ میکنیم
+        black_mask = image * mask   
+        black_mask = black_mask[y:y+h, x:x+w]  
         z = 2  #ضریب
         
-        result_big = cv2.resize(black_mask, (0, 0), fx=z, fy=z)  #اندازه خاصی بهش نمیدیم فقط میگیم هرچی که هست سه برابر شود
+        result_big = cv2.resize(black_mask, (0, 0), fx=z, fy=z)  
         return result_big, x ,y, w, h, z, landmarks
     # cv2.drawContours(image, [lips_landmarks], -1, (0, 0, 0), -1) 
 
