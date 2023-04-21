@@ -3,8 +3,8 @@ import cv2
 import tensorflow as tf
 from functools import partial
 import time
-from TFLiteFaceDetector import UltraLightFaceDetecion  
-from TFLiteFaceAlignment import CoordinateAlignmentModel  
+from TFLiteFaceDetector import UltraLightFaceDetecion   
+from TFLiteFaceAlignment import CoordinateAlignmentModel   
 
 fd = UltraLightFaceDetecion("weights/RFB-320.tflite",conf_threshold=0.88)
 fa = CoordinateAlignmentModel("weights/coor_2d106.tflite")
@@ -35,35 +35,28 @@ def zoom(image, point):
         
         mask = mask // 255
 
-        black_mask = image * mask   
+        black_mask = image * mask  
         black_mask = black_mask[y:y+h, x:x+w]  
         z = 2  #ضریب
         
-        result_big = cv2.resize(black_mask, (0, 0), fx=z, fy=z)  
-        return result_big, x ,y, w, h, z, landmarks
-    # cv2.drawContours(image, [lips_landmarks], -1, (0, 0, 0), -1) 
+        result_big = cv2.resize(black_mask, (0, 0), fx=z, fy=z) 
+        return result_big
+    
 
 lip = [52, 55, 56, 53, 59, 58, 61, 68, 67, 71, 63, 64]
 left_eye  = [39, 37, 33, 36, 35, 41, 40, 42]
 right_eye = [95, 94, 96, 93, 91, 87, 90, 89]
 
-result_big, x, y, w, h,z, landmarks = zoom(image, lip)             
-# y = y- (h//2)
-# x = x - (w//2)                    
-image_fruit[y:y+h*2, x:x+w*2] = np.add(image_fruit[y:y+h*2, x:x+w*2], result_big)
 
-result_big, x, y, w, h, z, landmarks = zoom(image, left_eye)             
-y = y- (h//z)
-x = x - (w//z)                 
-image_fruit[y:y+h*z, x:x+w*z] = np.add(image_fruit[y:y+h*z, x:x+w*z], result_big)
+result_big= zoom(image, lip)                              
+image_fruit[1150:1278, 574:896] = np.add(image_fruit[1150:1278, 574:896], result_big)
 
-result_big, x, y, w, h, z, landmarks = zoom(image, right_eye)             
-y = y- (h//z)
-x = x - (w//z)           
-image_fruit[y:y+h*z, x:x+w*z] = np.add(image_fruit[y:y+h*z, x:x+w*z], result_big)
+result_big= zoom(image, left_eye)                       
+image_fruit[874:932, 450:624] = np.add(image_fruit[874:932, 450:624], result_big)
 
-
-                    
+result_big= zoom(image, right_eye)                      
+image_fruit[874:932, 850:1018] = np.add(image_fruit[874:932, 850:1018], result_big)
+                  
 cv2.imshow("result", image_fruit)
 cv2.imwrite(f"output/result_fruit.jpg", image_fruit)
 cv2.waitKey() 
